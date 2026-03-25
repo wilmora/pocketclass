@@ -1,36 +1,154 @@
-This is a [Next.js](https://nextjs.org) project bootstrapped with [`create-next-app`](https://nextjs.org/docs/app/api-reference/cli/create-next-app).
+# 🎓 Pocketclass — Online Learning Marketplace
 
-## Getting Started
+A modern online learning marketplace where instructors sell courses and live training sessions, and students browse, purchase, and learn — built with Next.js and TypeScript.
 
-First, run the development server:
+---
+
+## 🖥️ Prerequisites
+
+Before running this project, make sure you have the following installed:
+
+| Tool | Version | Download |
+|------|---------|----------|
+| **Node.js** | v18 or higher | [nodejs.org](https://nodejs.org/) |
+| **npm** | v9 or higher (comes with Node.js) | Included with Node.js |
+| **Git** | Any recent version | [git-scm.com](https://git-scm.com/) |
+
+### How to check if you have them:
+
+Open a terminal (Command Prompt, PowerShell, or Terminal) and run:
+
+```bash
+node --version
+# Should show v18.x.x or higher
+
+npm --version
+# Should show 9.x.x or higher
+
+git --version
+# Should show git version 2.x.x
+```
+
+> **Don't have Node.js?** Download the **LTS** version from [nodejs.org](https://nodejs.org/). The installer will also install npm automatically.
+
+---
+
+## 🚀 Getting Started
+
+### Step 1: Clone the repository
+
+```bash
+git clone https://github.com/wilmora/pocketclass.git
+```
+
+### Step 2: Navigate into the project folder
+
+```bash
+cd pocketclass
+```
+
+### Step 3: Install dependencies
+
+```bash
+npm install
+```
+
+> This will download all required packages. It may take 1–2 minutes depending on your internet speed.
+
+### Step 4: Start the development server
 
 ```bash
 npm run dev
-# or
-yarn dev
-# or
-pnpm dev
-# or
-bun dev
 ```
 
-Open [http://localhost:3000](http://localhost:3000) with your browser to see the result.
+### Step 5: Open in your browser
 
-You can start editing the page by modifying `app/page.tsx`. The page auto-updates as you edit the file.
+Once the server starts, you'll see output like:
 
-This project uses [`next/font`](https://nextjs.org/docs/app/building-your-application/optimizing/fonts) to automatically optimize and load [Geist](https://vercel.com/font), a new font family for Vercel.
+```
+▲ Next.js 16.2.1 (Turbopack)
+- Local:    http://localhost:3000
+```
 
-## Learn More
+Open **http://localhost:3000** in your browser.
 
-To learn more about Next.js, take a look at the following resources:
+---
 
-- [Next.js Documentation](https://nextjs.org/docs) - learn about Next.js features and API.
-- [Learn Next.js](https://nextjs.org/learn) - an interactive Next.js tutorial.
+## 🔑 Demo Login
 
-You can check out [the Next.js GitHub repository](https://github.com/vercel/next.js) - your feedback and contributions are welcome!
+This MVP uses mock authentication. On the **Login** page, you can switch between three roles:
 
-## Deploy on Vercel
+| Role | What you can see |
+|------|-----------------|
+| **Student** | Student dashboard, enrolled courses, lesson viewer, messaging |
+| **Instructor** | Instructor dashboard, course creation wizard, revenue stats |
+| **Admin** | Admin panel with user management, course oversight, payment logs |
 
-The easiest way to deploy your Next.js app is to use the [Vercel Platform](https://vercel.com/new?utm_medium=default-template&filter=next.js&utm_source=create-next-app&utm_campaign=create-next-app-readme) from the creators of Next.js.
+Just click the role tabs on the login page, enter any email/password, and click "Sign In".
 
-Check out our [Next.js deployment documentation](https://nextjs.org/docs/app/building-your-application/deploying) for more details.
+---
+
+## 📁 Project Structure
+
+```
+pocketclass/
+├── src/
+│   ├── app/                    # All pages (Next.js App Router)
+│   │   ├── page.tsx            # Landing page
+│   │   ├── login/              # Login page
+│   │   ├── register/           # Registration page
+│   │   ├── courses/            # Course catalog, detail, lesson viewer
+│   │   ├── sessions/           # Live sessions listing
+│   │   ├── instructors/        # Instructor directory & profiles
+│   │   ├── messages/           # Messaging / chat
+│   │   ├── student/            # Student dashboard
+│   │   ├── instructor/         # Instructor dashboard & course creation
+│   │   └── admin/              # Admin panel
+│   ├── components/             # Reusable components (Header, Footer)
+│   ├── lib/                    # Auth context & mock data
+│   ├── types/                  # TypeScript type definitions
+│   └── styles/                 # Global CSS design system
+├── package.json
+└── tsconfig.json
+```
+
+---
+
+## 🛠️ Available Commands
+
+| Command | Description |
+|---------|-------------|
+| `npm run dev` | Start development server |
+| `npm run build` | Create production build |
+| `npm start` | Run production server |
+
+---
+
+## 🌐 Tech Stack
+
+- **Framework:** Next.js 16 (App Router) + TypeScript
+- **Styling:** Vanilla CSS with CSS custom properties
+- **Icons:** Lucide React
+- **Fonts:** Inter + Outfit (Google Fonts)
+
+---
+
+## 💡 Troubleshooting
+
+### "npm install" fails
+- Make sure Node.js v18+ is installed: `node --version`
+- Try deleting `node_modules` and `package-lock.json`, then run `npm install` again
+
+### Port 3000 is already in use
+- The app will automatically try port 3001. Check the terminal output for the correct URL.
+- Or stop whatever is using port 3000 and try again.
+
+### Page shows blank or errors
+- Make sure you ran `npm install` before `npm run dev`
+- Try stopping the server (Ctrl+C) and restarting with `npm run dev`
+
+---
+
+## 📄 License
+
+This project is proprietary. All rights reserved.
