@@ -3,21 +3,41 @@
 import { useState } from 'react';
 import { useParams } from 'next/navigation';
 import Link from 'next/link';
-import { Play, ChevronLeft, ChevronRight, CheckCircle, BookOpen, Clock, MessageSquare, List, X } from 'lucide-react';
-import { courses } from '@/lib/mock-data';
+import { Play, ChevronLeft, ChevronRight, CheckCircle, BookOpen, Clock, MessageSquare, List, X, Loader2, Video } from 'lucide-react';
+import { useCourse } from '@/lib/hooks';
 import { useAuth } from '@/lib/auth-context';
 import styles from './learn.module.css';
 
 export default function LearnPage() {
   const params = useParams();
   const { isAuthenticated } = useAuth();
-  const course = courses.find(c => c.id === params.id);
+  const { course, loading } = useCourse(params.id as string);
   const [sidebarOpen, setSidebarOpen] = useState(true);
-  const [activeLesson, setActiveLesson] = useState(course?.chapters[0]?.lessons[0]?.id || '');
+  const [activeLesson, setActiveLesson] = useState<string>('');
   const [completedLessons, setCompletedLessons] = useState<string[]>([]);
+  const [initialized, setInitialized] = useState(false);
+
+  // Initialize activeLesson once course loads
+  if (course && !initialized) {
+    const firstLessonId = course.chapters[0]?.lessons[0]?.id || '';
+    if (firstLessonId) {
+      setActiveLesson(firstLessonId);
+    }
+    setInitialized(true);
+  }
 
   if (!isAuthenticated) {
     return <div className={styles.authPrompt}><h2>Please <Link href="/login">sign in</Link> to access this course</h2></div>;
+  }
+
+  if (loading) {
+    return (
+      <div className={styles.authPrompt}>
+        <Loader2 size={36} style={{ animation: 'spin 1s linear infinite', marginBottom: '1rem' }} />
+        <h2>Loading course...</h2>
+        <style>{`@keyframes spin { from { transform: rotate(0deg); } to { transform: rotate(360deg); } }`}</style>
+      </div>
+    );
   }
 
   if (!course) return <div className={styles.authPrompt}><h2>Course not found</h2></div>;
@@ -25,7 +45,7 @@ export default function LearnPage() {
   const allLessons = course.chapters.flatMap(ch => ch.lessons);
   const currentIndex = allLessons.findIndex(l => l.id === activeLesson);
   const currentLesson = allLessons[currentIndex];
-  const progress = Math.round((completedLessons.length / allLessons.length) * 100);
+  const progress = allLessons.length > 0 ? Math.round((completedLessons.length / allLessons.length) * 100) : 0;
 
   const toggleComplete = (id: string) => {
     setCompletedLessons(prev => prev.includes(id) ? prev.filter(l => l !== id) : [...prev, id]);
@@ -36,21 +56,33 @@ export default function LearnPage() {
       {/* Video Area */}
       <div className={styles.mainContent}>
         <div className={styles.videoContainer}>
-          <div className={styles.videoPlaceholder}>
-            <Play size={56} />
-            <h3>{currentLesson?.title}</h3>
-            <p>Video player — will connect to video hosting service</p>
-          </div>
+          {currentLesson?.videoUrl ? (
+            <video
+              key={currentLesson.id}
+              controls
+              autoPlay={false}
+              style={{ width: '100%', height: '100%', objectFit: 'contain', background: '#000' }}
+              src={currentLesson.videoUrl}
+            >
+              Your browser does not support the video element.
+            </video>
+          ) : (
+            <div className={styles.videoPlaceholder}>
+              <Video size={56} />
+              <h3>{currentLesson?.title}</h3>
+              <p>Video content will be available soon</p>
+            </div>
+          )}
         </div>
 
         <div className={styles.videoControls}>
-          <button className={styles.navBtn} disabled={currentIndex === 0} onClick={() => setActiveLesson(allLessons[currentIndex - 1].id)}>
+          <button className={styles.navBtn} disabled={currentIndex <= 0} onClick={() => setActiveLesson(allLessons[currentIndex - 1].id)}>
             <ChevronLeft size={16} /> Previous
           </button>
           <button className={styles.completeBtn} onClick={() => toggleComplete(activeLesson)}>
             <CheckCircle size={16} /> {completedLessons.includes(activeLesson) ? 'Completed' : 'Mark Complete'}
           </button>
-          <button className={styles.navBtn} disabled={currentIndex === allLessons.length - 1} onClick={() => setActiveLesson(allLessons[currentIndex + 1].id)}>
+          <button className={styles.navBtn} disabled={currentIndex >= allLessons.length - 1} onClick={() => setActiveLesson(allLessons[currentIndex + 1].id)}>
             Next <ChevronRight size={16} />
           </button>
         </div>

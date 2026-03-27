@@ -1,10 +1,63 @@
 'use client';
 
+import { useState } from 'react';
+import { useRouter } from 'next/navigation';
 import { Video, Calendar, Clock, Users, Star, MapPin } from 'lucide-react';
-import { streamingSessions } from '@/lib/mock-data';
+import { useSessions } from '@/lib/hooks';
+import { useAuth } from '@/lib/auth-context';
+import { PRICING, formatPrice } from '@/lib/pricing';
 import styles from './sessions.module.css';
 
 export default function SessionsPage() {
+  const { sessions, loading } = useSessions();
+  const { user, isAuthenticated } = useAuth();
+  const router = useRouter();
+  const [bookingId, setBookingId] = useState<string | null>(null);
+
+  async function handleBook(session: (typeof sessions)[number]) {
+    if (!isAuthenticated || !user) {
+      router.push('/login');
+      return;
+    }
+
+    setBookingId(session.id);
+    try {
+      const res = await fetch('/api/checkout', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          items: [{ type: 'session', id: session.id, title: session.title }],
+          userId: user.id,
+          instructorId: session.instructor.id,
+        }),
+      });
+      const data = await res.json();
+      if (data.url) {
+        window.location.href = data.url;
+      }
+    } catch (err) {
+      console.error('Checkout error:', err);
+    } finally {
+      setBookingId(null);
+    }
+  }
+
+  if (loading) {
+    return (
+      <div className={styles.page}>
+        <div className={styles.header}>
+          <h1>Streaming Sessions</h1>
+          <p>Join interactive, real-time sessions with expert instructors</p>
+        </div>
+        <div className={styles.grid}>
+          {[1, 2, 3, 4].map(i => (
+            <div key={i} className={styles.card} style={{ minHeight: 280, opacity: 0.5, animation: 'pulse 1.5s ease-in-out infinite' }} />
+          ))}
+        </div>
+      </div>
+    );
+  }
+
   return (
     <div className={styles.page}>
       <div className={styles.header}>
@@ -12,7 +65,7 @@ export default function SessionsPage() {
         <p>Join interactive, real-time sessions with expert instructors</p>
       </div>
       <div className={styles.grid}>
-        {streamingSessions.map(session => (
+        {sessions.map(session => (
           <div key={session.id} className={styles.card}>
             <div className={styles.cardTop}>
               <span className={styles.badge}><Video size={14} /> Live</span>
@@ -38,8 +91,14 @@ export default function SessionsPage() {
                 <span>{session.maxParticipants - session.enrolledCount} spots left</span>
               </div>
               <div className={styles.priceAction}>
-                <strong>${session.price}</strong>
-                <button className={styles.bookBtn}>Book Seat</button>
+                <strong>{formatPrice(PRICING.SESSION_PRICE)}</strong>
+                <button
+                  className={styles.bookBtn}
+                  onClick={() => handleBook(session)}
+                  disabled={bookingId === session.id}
+                >
+                  {bookingId === session.id ? 'Booking...' : 'Book Seat'}
+                </button>
               </div>
             </div>
           </div>

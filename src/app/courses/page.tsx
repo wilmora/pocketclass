@@ -1,9 +1,11 @@
 'use client';
 
-import { useState } from 'react';
+import { useState, useMemo } from 'react';
 import Link from 'next/link';
-import { Search, Filter, Star, BookOpen, ChevronDown } from 'lucide-react';
-import { courses, categories } from '@/lib/mock-data';
+import { Search, Star, BookOpen, Loader2 } from 'lucide-react';
+import { useCourses } from '@/lib/hooks';
+import { categories } from '@/lib/mock-data';
+import { PRICING, formatPrice } from '@/lib/pricing';
 import styles from './courses.module.css';
 
 export default function CoursesPage() {
@@ -12,13 +14,24 @@ export default function CoursesPage() {
   const [selectedLevel, setSelectedLevel] = useState('All');
   const [sortBy, setSortBy] = useState('popular');
 
-  const filtered = courses.filter(c => {
-    const matchesSearch = c.title.toLowerCase().includes(searchQuery.toLowerCase()) ||
-      c.shortDescription.toLowerCase().includes(searchQuery.toLowerCase());
-    const matchesCategory = selectedCategory === 'All' || c.category === selectedCategory;
-    const matchesLevel = selectedLevel === 'All' || c.level === selectedLevel;
-    return matchesSearch && matchesCategory && matchesLevel;
+  const { courses, loading } = useCourses({
+    category: selectedCategory !== 'All' ? selectedCategory : undefined,
+    level: selectedLevel !== 'All' ? selectedLevel : undefined,
+    search: searchQuery || undefined,
+    sort: sortBy,
   });
+
+  // Apply sorting (hooks already sort in demo mode, but ensure it works)
+  const sorted = useMemo(() => {
+    const list = [...courses];
+    switch (sortBy) {
+      case 'rating': return list.sort((a, b) => b.rating - a.rating);
+      case 'students':
+      case 'popular': return list.sort((a, b) => b.studentCount - a.studentCount);
+      case 'newest': return list.sort((a, b) => new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime());
+      default: return list;
+    }
+  }, [courses, sortBy]);
 
   return (
     <div className={styles.page}>
@@ -47,52 +60,53 @@ export default function CoursesPage() {
             <option value="popular">Most Popular</option>
             <option value="rating">Highest Rated</option>
             <option value="newest">Newest</option>
-            <option value="price-low">Price: Low to High</option>
-            <option value="price-high">Price: High to Low</option>
           </select>
         </div>
       </div>
 
-      <p className={styles.resultCount}>{filtered.length} courses found</p>
+      <p className={styles.resultCount}>{sorted.length} courses found</p>
 
-      <div className={styles.courseGrid}>
-        {filtered.map(course => (
-          <Link href={`/courses/${course.id}`} key={course.id} className={styles.courseCard}>
-            <div className={styles.thumbnail}>
-              <div className={styles.thumbnailPlaceholder}>
-                <BookOpen size={28} />
-                <span>{course.category}</span>
-              </div>
-              {course.originalPrice && (
-                <span className={styles.badge}>{Math.round((1 - course.price / course.originalPrice) * 100)}% OFF</span>
-              )}
-            </div>
-            <div className={styles.body}>
-              <div className={styles.meta}>
-                <span className={styles.level}>{course.level}</span>
-                <span className={styles.duration}>{course.duration}</span>
-              </div>
-              <h3>{course.title}</h3>
-              <p className={styles.desc}>{course.shortDescription}</p>
-              <div className={styles.instructor}>
-                <img src={course.instructor.avatar} alt="" />
-                <span>{course.instructor.name}</span>
-              </div>
-              <div className={styles.footer}>
-                <div className={styles.rating}>
-                  <Star size={14} fill="#FDCB6E" stroke="#FDCB6E" />
-                  <strong>{course.rating}</strong>
-                  <span>({course.reviewCount})</span>
-                </div>
-                <div className={styles.price}>
-                  <strong>Free Enrollment</strong>
-                  <span className={styles.videoPricing}>$2 per video</span>
+      {loading ? (
+        <div style={{ textAlign: 'center', padding: '4rem' }}>
+          <Loader2 size={32} style={{ animation: 'spin 1s linear infinite' }} />
+        </div>
+      ) : (
+        <div className={styles.courseGrid}>
+          {sorted.map(course => (
+            <Link href={`/courses/${course.id}`} key={course.id} className={styles.courseCard}>
+              <div className={styles.thumbnail}>
+                <div className={styles.thumbnailPlaceholder}>
+                  <BookOpen size={28} />
+                  <span>{course.category}</span>
                 </div>
               </div>
-            </div>
-          </Link>
-        ))}
-      </div>
+              <div className={styles.body}>
+                <div className={styles.meta}>
+                  <span className={styles.level}>{course.level}</span>
+                  <span className={styles.duration}>{course.lessonCount} lessons</span>
+                </div>
+                <h3>{course.title}</h3>
+                <p className={styles.desc}>{course.shortDescription}</p>
+                <div className={styles.instructor}>
+                  <img src={course.instructor.avatar} alt="" />
+                  <span>{course.instructor.name}</span>
+                </div>
+                <div className={styles.footer}>
+                  <div className={styles.rating}>
+                    <Star size={14} fill="#FDCB6E" stroke="#FDCB6E" />
+                    <strong>{course.rating}</strong>
+                    <span>({course.reviewCount})</span>
+                  </div>
+                  <div className={styles.price}>
+                    <strong>Free Enrollment</strong>
+                    <span className={styles.videoPricing}>{formatPrice(PRICING.VIDEO_PRICE)} per video</span>
+                  </div>
+                </div>
+              </div>
+            </Link>
+          ))}
+        </div>
+      )}
     </div>
   );
 }

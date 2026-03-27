@@ -3,6 +3,7 @@
 import React, { useState } from 'react';
 import Link from 'next/link';
 import Image from 'next/image';
+import { useRouter } from 'next/navigation';
 import { useAuth } from '@/lib/auth-context';
 import {
   BookOpen, Search, Bell, MessageSquare, Menu, X, User, LogOut,
@@ -12,8 +13,23 @@ import styles from './Header.module.css';
 
 export default function Header() {
   const { user, isAuthenticated, logout } = useAuth();
+  const router = useRouter();
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
   const [profileDropdown, setProfileDropdown] = useState(false);
+  const [searchQuery, setSearchQuery] = useState('');
+
+  const handleSearch = () => {
+    const trimmed = searchQuery.trim();
+    if (trimmed) {
+      router.push(`/courses?search=${encodeURIComponent(trimmed)}`);
+    }
+  };
+
+  const handleSearchKeyDown = (e: React.KeyboardEvent<HTMLInputElement>) => {
+    if (e.key === 'Enter') {
+      handleSearch();
+    }
+  };
 
   const getDashboardLink = () => {
     if (!user) return '/login';
@@ -57,11 +73,14 @@ export default function Header() {
 
         {/* Search Bar */}
         <div className={styles.searchBar}>
-          <Search size={16} className={styles.searchIcon} />
+          <Search size={16} className={styles.searchIcon} onClick={handleSearch} style={{ cursor: 'pointer', pointerEvents: 'auto' }} />
           <input
             type="text"
             placeholder="Search courses, instructors..."
             className={styles.searchInput}
+            value={searchQuery}
+            onChange={(e) => setSearchQuery(e.target.value)}
+            onKeyDown={handleSearchKeyDown}
           />
         </div>
 

@@ -4,7 +4,7 @@ import React, { useState } from 'react';
 import Link from 'next/link';
 import { useRouter } from 'next/navigation';
 import { useAuth } from '@/lib/auth-context';
-import { GraduationCap, Mail, Lock, User, Eye, EyeOff } from 'lucide-react';
+import { GraduationCap, Mail, Lock, User, Eye, EyeOff, Loader2 } from 'lucide-react';
 import styles from '../login/auth.module.css';
 
 export default function RegisterPage() {
@@ -13,13 +13,34 @@ export default function RegisterPage() {
   const [password, setPassword] = useState('');
   const [showPassword, setShowPassword] = useState(false);
   const [role, setRole] = useState<'student' | 'instructor'>('student');
+  const [error, setError] = useState('');
+  const [loading, setLoading] = useState(false);
   const { register } = useAuth();
   const router = useRouter();
 
-  const handleSubmit = (e: React.FormEvent) => {
+  const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    register(name, email, password, role);
-    router.push(role === 'instructor' ? '/instructor/dashboard' : '/student/dashboard');
+    setError('');
+
+    if (password.length < 8) {
+      setError('Password must be at least 8 characters');
+      return;
+    }
+
+    setLoading(true);
+
+    try {
+      const result = await register(name, email, password, role);
+      if (result.error) {
+        setError(result.error);
+        setLoading(false);
+        return;
+      }
+      router.push(role === 'instructor' ? '/instructor/dashboard' : '/student/dashboard');
+    } catch {
+      setError('An unexpected error occurred. Please try again.');
+      setLoading(false);
+    }
   };
 
   return (
@@ -40,23 +61,27 @@ export default function RegisterPage() {
           </button>
         </div>
 
+        {error && <div className={styles.errorMsg}>{error}</div>}
+
         <form className={styles.authForm} onSubmit={handleSubmit}>
           <div className={styles.inputGroup}>
             <User size={18} className={styles.inputIcon} />
-            <input type="text" placeholder="Full name" value={name} onChange={e => setName(e.target.value)} className={styles.input} />
+            <input type="text" placeholder="Full name" value={name} onChange={e => setName(e.target.value)} className={styles.input} required />
           </div>
           <div className={styles.inputGroup}>
             <Mail size={18} className={styles.inputIcon} />
-            <input type="email" placeholder="Email address" value={email} onChange={e => setEmail(e.target.value)} className={styles.input} />
+            <input type="email" placeholder="Email address" value={email} onChange={e => setEmail(e.target.value)} className={styles.input} required />
           </div>
           <div className={styles.inputGroup}>
             <Lock size={18} className={styles.inputIcon} />
-            <input type={showPassword ? 'text' : 'password'} placeholder="Password (min 8 characters)" value={password} onChange={e => setPassword(e.target.value)} className={styles.input} />
+            <input type={showPassword ? 'text' : 'password'} placeholder="Password (min 8 characters)" value={password} onChange={e => setPassword(e.target.value)} className={styles.input} required minLength={8} />
             <button type="button" className={styles.eyeBtn} onClick={() => setShowPassword(!showPassword)}>
               {showPassword ? <EyeOff size={18} /> : <Eye size={18} />}
             </button>
           </div>
-          <button type="submit" className={styles.submitBtn}>Create Account</button>
+          <button type="submit" className={styles.submitBtn} disabled={loading}>
+            {loading ? <><Loader2 size={18} className={styles.spinner} /> Creating account...</> : 'Create Account'}
+          </button>
         </form>
 
         <div className={styles.divider}><span>or</span></div>

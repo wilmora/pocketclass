@@ -2,19 +2,27 @@
 
 import Link from 'next/link';
 import { useAuth } from '@/lib/auth-context';
+import { useStudentStats, useCourses, useSessions } from '@/lib/hooks';
+import { formatPrice } from '@/lib/pricing';
 import { BookOpen, Clock, Play, MessageSquare, Calendar, TrendingUp, Star, ArrowRight } from 'lucide-react';
-import { courses, streamingSessions } from '@/lib/mock-data';
 import styles from './dashboard.module.css';
 
 export default function StudentDashboard() {
-  const { user, isAuthenticated } = useAuth();
+  const { user, isAuthenticated, isLoading: authLoading } = useAuth();
+  const { stats, loading: statsLoading } = useStudentStats(user?.id || '');
+  const { courses, loading: coursesLoading } = useCourses();
+  const { sessions, loading: sessionsLoading } = useSessions();
+
+  if (authLoading) {
+    return <div className={styles.authPrompt}><h2>Loading...</h2></div>;
+  }
 
   if (!isAuthenticated) {
     return <div className={styles.authPrompt}><h2>Please <Link href="/login">sign in</Link> to access your dashboard</h2></div>;
   }
 
   const enrolledCourses = courses.slice(0, 3);
-  const upcomingSessions = streamingSessions.slice(0, 2);
+  const upcomingSessions = sessions.slice(0, 2);
 
   return (
     <div className={styles.page}>
@@ -28,22 +36,33 @@ export default function StudentDashboard() {
 
       {/* Stats */}
       <div className={styles.statsGrid}>
-        <div className={styles.statCard}>
-          <BookOpen size={24} className={styles.statIcon} />
-          <div><strong>3</strong><span>Enrolled Courses</span></div>
-        </div>
-        <div className={styles.statCard}>
-          <Clock size={24} className={styles.statIcon} />
-          <div><strong>24h</strong><span>Learning Time</span></div>
-        </div>
-        <div className={styles.statCard}>
-          <TrendingUp size={24} className={styles.statIcon} />
-          <div><strong>67%</strong><span>Avg. Progress</span></div>
-        </div>
-        <div className={styles.statCard}>
-          <Star size={24} className={styles.statIcon} />
-          <div><strong>2</strong><span>Certificates</span></div>
-        </div>
+        {statsLoading ? (
+          <>
+            <div className={styles.statCard}><BookOpen size={24} className={styles.statIcon} /><div><strong>...</strong><span>Enrolled Courses</span></div></div>
+            <div className={styles.statCard}><Clock size={24} className={styles.statIcon} /><div><strong>...</strong><span>Completed Lessons</span></div></div>
+            <div className={styles.statCard}><TrendingUp size={24} className={styles.statIcon} /><div><strong>...</strong><span>Avg. Progress</span></div></div>
+            <div className={styles.statCard}><Star size={24} className={styles.statIcon} /><div><strong>...</strong><span>Total Spent</span></div></div>
+          </>
+        ) : (
+          <>
+            <div className={styles.statCard}>
+              <BookOpen size={24} className={styles.statIcon} />
+              <div><strong>{stats.enrolledCourses}</strong><span>Enrolled Courses</span></div>
+            </div>
+            <div className={styles.statCard}>
+              <Clock size={24} className={styles.statIcon} />
+              <div><strong>{stats.completedLessons}</strong><span>Completed Lessons</span></div>
+            </div>
+            <div className={styles.statCard}>
+              <TrendingUp size={24} className={styles.statIcon} />
+              <div><strong>{stats.avgProgress}%</strong><span>Avg. Progress</span></div>
+            </div>
+            <div className={styles.statCard}>
+              <Star size={24} className={styles.statIcon} />
+              <div><strong>{formatPrice(stats.totalSpent)}</strong><span>Total Spent</span></div>
+            </div>
+          </>
+        )}
       </div>
 
       <div className={styles.grid}>
@@ -54,9 +73,12 @@ export default function StudentDashboard() {
             <Link href="/courses">View All</Link>
           </div>
           <div className={styles.courseList}>
-            {enrolledCourses.map((course, i) => {
-              const progress = [72, 45, 15][i];
-              return (
+            {coursesLoading ? (
+              <div className={styles.enrolledCard}>
+                <div className={styles.enrolledInfo}><h4>Loading courses...</h4></div>
+              </div>
+            ) : (
+              enrolledCourses.map((course) => (
                 <Link href={`/courses/${course.id}/learn`} key={course.id} className={styles.enrolledCard}>
                   <div className={styles.enrolledThumb}>
                     <BookOpen size={20} />
@@ -65,14 +87,14 @@ export default function StudentDashboard() {
                     <h4>{course.title}</h4>
                     <p>{course.instructor.name}</p>
                     <div className={styles.progressBar}>
-                      <div className={styles.progressFill} style={{ width: `${progress}%` }} />
+                      <div className={styles.progressFill} style={{ width: `${stats.avgProgress}%` }} />
                     </div>
-                    <span className={styles.progressText}>{progress}% complete</span>
+                    <span className={styles.progressText}>{stats.avgProgress}% complete</span>
                   </div>
                   <Play size={18} className={styles.playIcon} />
                 </Link>
-              );
-            })}
+              ))
+            )}
           </div>
         </section>
 
@@ -83,19 +105,25 @@ export default function StudentDashboard() {
             <Link href="/sessions">View All</Link>
           </div>
           <div className={styles.sessionList}>
-            {upcomingSessions.map(session => (
-              <div key={session.id} className={styles.sessionCard}>
-                <div className={styles.sessionDate}>
-                  <span>{new Date(session.date).toLocaleDateString('en', { month: 'short' })}</span>
-                  <strong>{new Date(session.date).getDate()}</strong>
-                </div>
-                <div className={styles.sessionInfo}>
-                  <h4>{session.title}</h4>
-                  <p>{session.instructor.name} · {session.time} {session.timezone}</p>
-                </div>
-                <button className={styles.joinBtn}>Join</button>
+            {sessionsLoading ? (
+              <div className={styles.sessionCard}>
+                <div className={styles.sessionInfo}><h4>Loading sessions...</h4></div>
               </div>
-            ))}
+            ) : (
+              upcomingSessions.map(session => (
+                <div key={session.id} className={styles.sessionCard}>
+                  <div className={styles.sessionDate}>
+                    <span>{new Date(session.date).toLocaleDateString('en', { month: 'short' })}</span>
+                    <strong>{new Date(session.date).getDate()}</strong>
+                  </div>
+                  <div className={styles.sessionInfo}>
+                    <h4>{session.title}</h4>
+                    <p>{session.instructor.name} · {session.time} {session.timezone}</p>
+                  </div>
+                  <button className={styles.joinBtn}>Join</button>
+                </div>
+              ))
+            )}
           </div>
 
           <div className={styles.sectionHeader} style={{ marginTop: 'var(--space-8)' }}>

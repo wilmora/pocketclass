@@ -3,12 +3,27 @@
 import { useParams } from 'next/navigation';
 import Link from 'next/link';
 import { Star, Users, BookOpen, Clock, MessageSquare, Globe, ExternalLink } from 'lucide-react';
-import { instructors, courses } from '@/lib/mock-data';
+import { useInstructor, useCourses } from '@/lib/hooks';
 import styles from './profile.module.css';
 
 export default function InstructorProfilePage() {
   const params = useParams();
-  const instructor = instructors.find(i => i.id === params.id);
+  const { instructor, loading: instructorLoading } = useInstructor(params.id as string);
+  const { courses, loading: coursesLoading } = useCourses();
+
+  if (instructorLoading || coursesLoading) {
+    return (
+      <div className={styles.page}>
+        <div className={styles.profileHeader} style={{ opacity: 0.5 }}>
+          <div style={{ width: 120, height: 120, borderRadius: '50%', background: '#e0e0e0' }} />
+          <div className={styles.profileInfo}>
+            <h1 style={{ background: '#e0e0e0', height: 28, borderRadius: 4, width: '40%' }}>&nbsp;</h1>
+            <p style={{ background: '#e0e0e0', height: 40, borderRadius: 4, marginTop: 12 }}>&nbsp;</p>
+          </div>
+        </div>
+      </div>
+    );
+  }
 
   if (!instructor) return <div className={styles.notFound}>Instructor not found</div>;
 

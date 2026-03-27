@@ -2,19 +2,36 @@
 
 import { useState } from 'react';
 import Link from 'next/link';
-import { useParams } from 'next/navigation';
-import { Star, Clock, Users, BookOpen, Play, CheckCircle, ChevronDown, ChevronRight, Lock, MessageSquare, Video, Award } from 'lucide-react';
-import { courses, reviews } from '@/lib/mock-data';
+import { useParams, useRouter } from 'next/navigation';
+import { Star, Clock, Users, BookOpen, Play, CheckCircle, ChevronDown, ChevronRight, Lock, MessageSquare, Video, Award, ShieldCheck } from 'lucide-react';
+import { reviews } from '@/lib/mock-data';
 import { useAuth } from '@/lib/auth-context';
+import { useCourse } from '@/lib/hooks';
+import { PRICING, formatPrice } from '@/lib/pricing';
 import styles from './courseDetail.module.css';
 
 export default function CourseDetailPage() {
   const params = useParams();
-  const { isAuthenticated } = useAuth();
-  const course = courses.find(c => c.id === params.id);
-  const [openChapters, setOpenChapters] = useState<string[]>([course?.chapters[0]?.id || '']);
+  const router = useRouter();
+  const { user, isAuthenticated } = useAuth();
+  const { course, loading } = useCourse(params.id as string);
+  const [openChapters, setOpenChapters] = useState<string[]>([]);
   const [showCheckout, setShowCheckout] = useState(false);
   const [selectedVideos, setSelectedVideos] = useState<Set<string>>(new Set());
+  const [checkoutLoading, setCheckoutLoading] = useState(false);
+
+  // Once course loads, open the first chapter by default
+  if (course && openChapters.length === 0 && course.chapters.length > 0) {
+    setOpenChapters([course.chapters[0].id]);
+  }
+
+  if (loading) {
+    return (
+      <div className={styles.page}>
+        <div className={styles.notFound}>Loading course...</div>
+      </div>
+    );
+  }
 
   if (!course) return <div className={styles.notFound}>Course not found</div>;
 
@@ -36,7 +53,59 @@ export default function CourseDetailPage() {
   };
 
   const selectedCount = selectedVideos.size;
-  const totalCost = selectedCount * 2;
+  const totalCost = selectedCount * PRICING.VIDEO_PRICE;
+
+  const handleCheckoutClick = () => {
+    if (!isAuthenticated) {
+      router.push('/login');
+      return;
+    }
+    setShowCheckout(true);
+  };
+
+  const handleStripeCheckout = async () => {
+    if (!user) {
+      router.push('/login');
+      return;
+    }
+
+    setCheckoutLoading(true);
+
+    // Build items array from selected videos
+    const items: { type: 'video'; id: string; title: string }[] = [];
+    for (const chapter of course.chapters) {
+      for (const lesson of chapter.lessons) {
+        if (selectedVideos.has(lesson.id)) {
+          items.push({ type: 'video', id: lesson.id, title: lesson.title });
+        }
+      }
+    }
+
+    try {
+      const response = await fetch('/api/checkout', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          items,
+          userId: user.id,
+          instructorId: course.instructor.id,
+        }),
+      });
+
+      const data = await response.json();
+
+      if (data.url) {
+        window.location.href = data.url;
+      } else {
+        alert('Failed to create checkout session. Please try again.');
+        setCheckoutLoading(false);
+      }
+    } catch (error) {
+      console.error('Checkout error:', error);
+      alert('Something went wrong. Please try again.');
+      setCheckoutLoading(false);
+    }
+  };
 
   return (
     <div className={styles.page}>
@@ -111,7 +180,7 @@ export default function CourseDetailPage() {
                           <span className={styles.lessonTitle}>{lesson.title}</span>
                           {lesson.isFree && <span className={styles.freeBadge}>Free</span>}
                           {lesson.type === 'video' && !lesson.isFree && (
-                            <span className={styles.videoPrice}>$2</span>
+                            <span className={styles.videoPrice}>{formatPrice(PRICING.VIDEO_PRICE)}</span>
                           )}
                           <span className={styles.lessonDuration}>{lesson.duration}</span>
                         </div>
@@ -156,15 +225,15 @@ export default function CourseDetailPage() {
             <div className={styles.sidebarBody}>
               <div className={styles.priceRow}>
                 <span className={styles.mainPrice}>Free Enrollment</span>
-                <span className={styles.videoPricing}>$2 per video</span>
+                <span className={styles.videoPricing}>{formatPrice(PRICING.VIDEO_PRICE)} per video</span>
               </div>
               {selectedCount > 0 && (
                 <div className={styles.selectionSummary}>
                   <p>{selectedCount} video{selectedCount !== 1 ? 's' : ''} selected</p>
-                  <p className={styles.totalCost}>Total: ${totalCost}</p>
+                  <p className={styles.totalCost}>Total: {formatPrice(totalCost)}</p>
                 </div>
               )}
-              <button className={styles.enrollBtn} onClick={() => setShowCheckout(true)}>
+              <button className={styles.enrollBtn} onClick={handleCheckoutClick}>
                 {selectedCount > 0 ? `Purchase ${selectedCount} Video${selectedCount !== 1 ? 's' : ''}` : 'Select Videos to Start'}
               </button>
               <button className={styles.wishlistBtn}>Add to Wishlist</button>
@@ -197,39 +266,32 @@ export default function CourseDetailPage() {
                       <div key={lesson.id} className={styles.selectedVideo}>
                         <Play size={14} />
                         <span>{lesson.title}</span>
-                        <span>$2</span>
+                        <span>{formatPrice(PRICING.VIDEO_PRICE)}</span>
                       </div>
                     ))
                 )}
               </div>
             </div>
             <div className={styles.paymentMethods}>
-              <h3>Payment Method</h3>
-              <label className={styles.paymentOption}>
-                <input type="radio" name="payment" defaultChecked /> 💳 Credit / Debit Card
-              </label>
-              <label className={styles.paymentOption}>
-                <input type="radio" name="payment" /> <span className={styles.paypalLogo}>PayPal</span>
-              </label>
-              <label className={styles.paymentOption}>
-                <input type="radio" name="payment" /> 🏦 Bank Transfer / Interac
-              </label>
-            </div>
-            <div className={styles.cardForm}>
-              <input placeholder="Card number" className={styles.cardInput} />
-              <div className={styles.cardRow}>
-                <input placeholder="MM/YY" className={styles.cardInput} />
-                <input placeholder="CVC" className={styles.cardInput} />
-              </div>
+              <p style={{ fontSize: '0.875rem', color: '#6B7280', lineHeight: 1.5 }}>
+                You pay {formatPrice(PRICING.VIDEO_PRICE)} per video. Only pay for the content you want -- no subscriptions, no hidden fees.
+              </p>
             </div>
             <div className={styles.modalTotal}>
               <span>Total ({selectedCount} video{selectedCount !== 1 ? 's' : ''})</span>
-              <strong>${totalCost}</strong>
+              <strong>{formatPrice(totalCost)}</strong>
             </div>
-            <button className={styles.payBtn} onClick={() => { setShowCheckout(false); alert(`Payment successful! You now have access to ${selectedCount} video${selectedCount !== 1 ? 's' : ''}. (Demo)`); }}>
-              Pay ${totalCost}
+            <button
+              className={styles.payBtn}
+              onClick={handleStripeCheckout}
+              disabled={checkoutLoading || selectedCount === 0}
+            >
+              {checkoutLoading ? 'Redirecting to Stripe...' : `Pay with Stripe - ${formatPrice(totalCost)}`}
             </button>
-            <p className={styles.secureNote}>🔒 Secured with 256-bit encryption</p>
+            <p className={styles.secureNote}>
+              <ShieldCheck size={14} style={{ display: 'inline', verticalAlign: 'middle', marginRight: 4 }} />
+              Secure checkout powered by Stripe
+            </p>
           </div>
         </div>
       )}
