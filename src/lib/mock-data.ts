@@ -2,7 +2,7 @@
 // POCKETCLASS — Mock Data for MVP
 // ============================================
 
-import { Instructor, Course, LiveSession, Conversation, Message, PlatformStats, Review } from '@/types';
+import { Instructor, Course, StreamingSession, Conversation, Message, PlatformStats, Review } from '@/types';
 
 // ---------- Instructors ----------
 export const instructors: Instructor[] = [
@@ -114,8 +114,7 @@ export const courses: Course[] = [
     shortDescription: 'Build production-ready React apps with TypeScript',
     thumbnail: '/api/placeholder/800/450',
     instructor: instructors[0],
-    price: 79.99,
-    originalPrice: 129.99,
+    price: 0,
     category: 'Web Development',
     tags: ['React', 'TypeScript', 'Frontend'],
     level: 'intermediate',
@@ -164,8 +163,7 @@ export const courses: Course[] = [
     shortDescription: 'Create professional games with Unity & C#',
     thumbnail: '/api/placeholder/800/450',
     instructor: instructors[1],
-    price: 89.99,
-    originalPrice: 149.99,
+    price: 0,
     category: 'Game Development',
     tags: ['Unity', 'C#', 'Game Design'],
     level: 'beginner',
@@ -205,7 +203,7 @@ export const courses: Course[] = [
     shortDescription: 'Master UI/UX design with real-world projects',
     thumbnail: '/api/placeholder/800/450',
     instructor: instructors[2],
-    price: 69.99,
+    price: 0,
     category: 'Design',
     tags: ['UI/UX', 'Figma', 'Design Systems'],
     level: 'beginner',
@@ -245,8 +243,7 @@ export const courses: Course[] = [
     shortDescription: 'Learn ML from theory to real-world deployment',
     thumbnail: '/api/placeholder/800/450',
     instructor: instructors[3],
-    price: 99.99,
-    originalPrice: 179.99,
+    price: 0,
     category: 'Data Science',
     tags: ['Machine Learning', 'Python', 'AI'],
     level: 'intermediate',
@@ -278,7 +275,7 @@ export const courses: Course[] = [
     shortDescription: 'Capture stunning photos like a professional',
     thumbnail: '/api/placeholder/800/450',
     instructor: instructors[4],
-    price: 49.99,
+    price: 0,
     category: 'Photography',
     tags: ['Photography', 'Lightroom', 'Composition'],
     level: 'beginner',
@@ -308,8 +305,7 @@ export const courses: Course[] = [
     shortDescription: 'Master cybersecurity and ethical hacking',
     thumbnail: '/api/placeholder/800/450',
     instructor: instructors[5],
-    price: 84.99,
-    originalPrice: 139.99,
+    price: 0,
     category: 'Cybersecurity',
     tags: ['Hacking', 'Security', 'Linux'],
     level: 'intermediate',
@@ -333,8 +329,8 @@ export const courses: Course[] = [
   },
 ];
 
-// ---------- Live Sessions ----------
-export const liveSessions: LiveSession[] = [
+// ---------- Streaming Sessions ----------
+export const streamingSessions: StreamingSession[] = [
   {
     id: 'session-1',
     title: 'Live React Code Review & Q&A',
@@ -344,7 +340,7 @@ export const liveSessions: LiveSession[] = [
     time: '2:00 PM',
     duration: '90 min',
     timezone: 'EST',
-    price: 29.99,
+    price: 3,
     maxParticipants: 30,
     enrolledCount: 22,
     status: 'upcoming',
@@ -359,7 +355,7 @@ export const liveSessions: LiveSession[] = [
     time: '10:00 AM',
     duration: '2 hours',
     timezone: 'EST',
-    price: 39.99,
+    price: 3,
     maxParticipants: 25,
     enrolledCount: 18,
     status: 'upcoming',
@@ -374,7 +370,7 @@ export const liveSessions: LiveSession[] = [
     time: '3:00 PM',
     duration: '60 min',
     timezone: 'EST',
-    price: 24.99,
+    price: 3,
     maxParticipants: 20,
     enrolledCount: 15,
     status: 'upcoming',
@@ -389,7 +385,7 @@ export const liveSessions: LiveSession[] = [
     time: '1:00 PM',
     duration: '90 min',
     timezone: 'EST',
-    price: 34.99,
+    price: 3,
     maxParticipants: 15,
     enrolledCount: 12,
     status: 'upcoming',

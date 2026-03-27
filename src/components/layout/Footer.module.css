@@ -32,6 +32,19 @@
   font-weight: var(--font-bold);
   color: white;
   text-decoration: none;
+  background: transparent;
+}
+
+.logoImage {
+  height: auto;
+  width: auto;
+  object-fit: contain;
+  max-height: 80px;
+  max-width: 80px;
+  background: transparent !important;
+  border: none !important;
+  box-shadow: none !important;
+  filter: none;
 }
 
 .logoIcon {

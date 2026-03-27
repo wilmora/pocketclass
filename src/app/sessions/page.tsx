@@ -1,18 +1,18 @@
 'use client';
 
 import { Video, Calendar, Clock, Users, Star, MapPin } from 'lucide-react';
-import { liveSessions } from '@/lib/mock-data';
+import { streamingSessions } from '@/lib/mock-data';
 import styles from './sessions.module.css';
 
 export default function SessionsPage() {
   return (
     <div className={styles.page}>
       <div className={styles.header}>
-        <h1>Live Sessions</h1>
+        <h1>Streaming Sessions</h1>
         <p>Join interactive, real-time sessions with expert instructors</p>
       </div>
       <div className={styles.grid}>
-        {liveSessions.map(session => (
+        {streamingSessions.map(session => (
           <div key={session.id} className={styles.card}>
             <div className={styles.cardTop}>
               <span className={styles.badge}><Video size={14} /> Live</span>

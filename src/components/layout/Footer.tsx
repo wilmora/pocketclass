@@ -1,5 +1,6 @@
 import Link from 'next/link';
-import { GraduationCap, Mail, MapPin, Phone } from 'lucide-react';
+import Image from 'next/image';
+import { Mail, MapPin, Phone } from 'lucide-react';
 import styles from './Footer.module.css';
 
 export default function Footer() {
@@ -10,14 +11,17 @@ export default function Footer() {
           {/* Brand */}
           <div className={styles.brand}>
             <Link href="/" className={styles.logo}>
-              <div className={styles.logoIcon}>
-                <GraduationCap size={20} />
-              </div>
-              <span>Pocketclass</span>
+              <Image 
+                src="/Logomain.png"
+                alt="Pocketclass Logo"
+                width={32}
+                height={32}
+                className={styles.logoImage}
+              />
             </Link>
             <p className={styles.brandDesc}>
               The marketplace connecting expert instructors with passionate learners.
-              Discover courses, join live sessions, and level up your skills.
+              Discover courses, join streaming sessions, and level up your skills.
             </p>
             <div className={styles.contactInfo}>
               <div className={styles.contactItem}><Mail size={14} /> hello@pocketclass.com</div>
@@ -29,17 +33,15 @@ export default function Footer() {
           <div className={styles.linkGroup}>
             <h4>Platform</h4>
             <Link href="/courses">Browse Courses</Link>
-            <Link href="/sessions">Live Sessions</Link>
+            <Link href="/sessions">Streaming Sessions</Link>
             <Link href="/instructors">Find Instructors</Link>
             <Link href="/register">Become an Instructor</Link>
           </div>
 
           <div className={styles.linkGroup}>
             <h4>Company</h4>
-            <Link href="#">About Us</Link>
+            <Link href="/about">About Us</Link>
             <Link href="#">Careers</Link>
-            <Link href="#">Blog</Link>
-            <Link href="#">Press</Link>
           </div>
 
           <div className={styles.linkGroup}>

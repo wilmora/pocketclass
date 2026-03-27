@@ -1,8 +1,9 @@
 'use client';
 
 import Link from 'next/link';
-import { ArrowRight, Play, Star, Users, BookOpen, Video, Zap, Shield, TrendingUp, ChevronRight } from 'lucide-react';
-import { courses, instructors, categories, liveSessions } from '@/lib/mock-data';
+import { useState } from 'react';
+import { ArrowRight, Play, Star, Users, BookOpen, Video, Zap, Shield, TrendingUp, ChevronRight, X } from 'lucide-react';
+import { courses, instructors, categories, streamingSessions } from '@/lib/mock-data';
 import styles from './page.module.css';
 
 function StarRating({ rating }: { rating: number }) {
@@ -16,6 +17,8 @@ function StarRating({ rating }: { rating: number }) {
 }
 
 export default function HomePage() {
+  const [showVideoModal, setShowVideoModal] = useState(false);
+  const introVideoUrl = '/intro.mp4'; // place your attached file at public/intro.mp4
   const featuredCourses = courses.filter(c => c.isFeatured).slice(0, 4);
   const topInstructors = instructors.slice(0, 4);
 
@@ -26,7 +29,7 @@ export default function HomePage() {
         <div className={styles.heroGlow} />
         <div className={styles.heroContent}>
           <div className={styles.heroBadge}>
-            <Zap size={14} /> New: Live sessions are here!
+            <Zap size={14} /> New: Streaming sessions are here!
           </div>
           <h1 className={styles.heroTitle}>
             Learn from the <span className={styles.gradientText}>best minds</span> in the world
@@ -84,6 +87,40 @@ export default function HomePage() {
           </div>
           <div className={styles.floatingCard + ' ' + styles.floatingCard2}>
             <Star size={18} fill="#FDCB6E" stroke="#FDCB6E" /> <strong>4.9</strong> rating
+          </div>
+        </div>
+      </section>
+
+      {/* ===== INTRODUCTORY VIDEO ===== */}
+      <section className={styles.videoSection}>
+        <div className={styles.videoContainer}>
+          <div className={styles.videoContent}>
+            <h2>Welcome to PocketClass</h2>
+            <p>Watch our 2-minute introduction to see how PocketClass is revolutionizing online learning</p>
+            <div className={styles.videoStats}>
+              <div className={styles.videoStat}>
+                <Play size={16} />
+                <span>2 min watch time</span>
+              </div>
+              <div className={styles.videoStat}>
+                <Users size={16} />
+                <span>Learn our story</span>
+              </div>
+            </div>
+          </div>
+          <div className={styles.videoPlayer}>
+            <div className={styles.videoThumbnail} onClick={() => setShowVideoModal(true)}>
+              <div className={styles.playButton}>
+                <Play size={48} fill="white" />
+              </div>
+              <div className={styles.videoOverlay}>
+                <span>Click to watch introduction</span>
+              </div>
+            </div>
+            <div className={styles.videoInfo}>
+              <h3>What is PocketClass?</h3>
+              <p>A revolutionary platform connecting expert instructors with passionate learners through flexible, pay-per-content education.</p>
+            </div>
           </div>
         </div>
       </section>
@@ -148,8 +185,8 @@ export default function HomePage() {
                     <span>({course.reviewCount})</span>
                   </div>
                   <div className={styles.coursePrice}>
-                    <strong>${course.price}</strong>
-                    {course.originalPrice && <span className={styles.courseOriginalPrice}>${course.originalPrice}</span>}
+                    <strong>Free Enrollment</strong>
+                    <span className={styles.videoPricing}>$2 per video</span>
                   </div>
                 </div>
               </div>
@@ -158,11 +195,11 @@ export default function HomePage() {
         </div>
       </section>
 
-      {/* ===== LIVE SESSIONS ===== */}
+      {/* ===== STREAMING SESSIONS ===== */}
       <section className={styles.section + ' ' + styles.sessionSection}>
         <div className={styles.sectionHeader}>
           <div>
-            <h2>Upcoming Live Sessions</h2>
+            <h2>Upcoming Streaming Sessions</h2>
             <p>Join interactive sessions with expert instructors in real time</p>
           </div>
           <Link href="/sessions" className={styles.viewAllLink}>
@@ -170,10 +207,10 @@ export default function HomePage() {
           </Link>
         </div>
         <div className={styles.sessionGrid}>
-          {liveSessions.slice(0, 3).map(session => (
+          {streamingSessions.slice(0, 3).map(session => (
             <div key={session.id} className={styles.sessionCard}>
               <div className={styles.sessionBadge}>
-                <Video size={14} /> Live Session
+                <Video size={14} /> Streaming Session
               </div>
               <h3 className={styles.sessionTitle}>{session.title}</h3>
               <p className={styles.sessionDesc}>{session.description}</p>
@@ -245,13 +282,13 @@ export default function HomePage() {
           <div className={styles.step}>
             <div className={styles.stepNumber}>2</div>
             <h3>Enroll</h3>
-            <p>Purchase courses or book live sessions. Pay securely with your preferred method.</p>
+            <p>Purchase courses or book streaming sessions. Pay securely with your preferred method.</p>
           </div>
           <div className={styles.stepConnector} />
           <div className={styles.step}>
             <div className={styles.stepNumber}>3</div>
             <h3>Learn</h3>
-            <p>Watch videos at your own pace, join live sessions, and chat with your instructor.</p>
+            <p>Watch videos at your own pace, join streaming sessions, and chat with your instructor.</p>
           </div>
         </div>
       </section>
@@ -266,6 +303,35 @@ export default function HomePage() {
           </Link>
         </div>
       </section>
+
+      {/* ===== VIDEO MODAL ===== */}
+      {showVideoModal && (
+        <div className={styles.videoModal} onClick={() => setShowVideoModal(false)}>
+          <div className={styles.videoModalContent} onClick={e => e.stopPropagation()}>
+            <button
+              className={styles.closeButton}
+              onClick={() => setShowVideoModal(false)}
+              aria-label="Close video"
+            >
+              <X size={24} />
+            </button>
+            <div className={styles.videoPlayerWrapper}>
+              <video
+                width="100%"
+                height="100%"
+                controls
+                autoPlay
+                loop={false}
+                poster="/intro-poster.png"
+                style={{ width: '100%', height: '100%', objectFit: 'contain' }}
+              >
+                <source src={introVideoUrl} type="video/mp4" />
+                Your browser does not support HTML video. Watch <a href={introVideoUrl}>here</a>.
+              </video>
+            </div>
+          </div>
+        </div>
+      )}
     </div>
   );
 }

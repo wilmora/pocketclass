@@ -3,7 +3,7 @@
 import Link from 'next/link';
 import { useAuth } from '@/lib/auth-context';
 import { BookOpen, Clock, Play, MessageSquare, Calendar, TrendingUp, Star, ArrowRight } from 'lucide-react';
-import { courses, liveSessions } from '@/lib/mock-data';
+import { courses, streamingSessions } from '@/lib/mock-data';
 import styles from './dashboard.module.css';
 
 export default function StudentDashboard() {
@@ -14,7 +14,7 @@ export default function StudentDashboard() {
   }
 
   const enrolledCourses = courses.slice(0, 3);
-  const upcomingSessions = liveSessions.slice(0, 2);
+  const upcomingSessions = streamingSessions.slice(0, 2);
 
   return (
     <div className={styles.page}>

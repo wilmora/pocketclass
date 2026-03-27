@@ -25,6 +25,19 @@
   gap: var(--space-2);
   text-decoration: none;
   flex-shrink: 0;
+  background: transparent;
+}
+
+.logoImage {
+  height: auto;
+  width: auto;
+  object-fit: contain;
+  max-height: 90px;
+  max-width: 90px;
+  background: transparent !important;
+  border: none !important;
+  box-shadow: none !important;
+  filter: none;
 }
 
 .logoIcon {

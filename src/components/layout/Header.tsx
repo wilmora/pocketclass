@@ -2,10 +2,11 @@
 
 import React, { useState } from 'react';
 import Link from 'next/link';
+import Image from 'next/image';
 import { useAuth } from '@/lib/auth-context';
 import {
   BookOpen, Search, Bell, MessageSquare, Menu, X, User, LogOut,
-  LayoutDashboard, ChevronDown, GraduationCap, Video
+  LayoutDashboard, ChevronDown, Video
 } from 'lucide-react';
 import styles from './Header.module.css';
 
@@ -28,10 +29,14 @@ export default function Header() {
       <div className={styles.headerInner}>
         {/* Logo */}
         <Link href="/" className={styles.logo}>
-          <div className={styles.logoIcon}>
-            <GraduationCap size={24} />
-          </div>
-          <span className={styles.logoText}>Pocketclass</span>
+          <Image 
+            src="/Logomain.png" 
+            alt="Pocketclass Logo"
+            width={40}
+            height={40}
+            className={styles.logoImage}
+            priority
+          />
         </Link>
 
         {/* Desktop Nav */}
@@ -42,7 +47,7 @@ export default function Header() {
           </Link>
           <Link href="/sessions" className={styles.navLink}>
             <Video size={16} />
-            Live Sessions
+            Streaming Sessions
           </Link>
           <Link href="/instructors" className={styles.navLink}>
             <User size={16} />
@@ -121,7 +126,7 @@ export default function Header() {
       {mobileMenuOpen && (
         <div className={styles.mobileMenu}>
           <Link href="/courses" className={styles.mobileNavLink} onClick={() => setMobileMenuOpen(false)}>Courses</Link>
-          <Link href="/sessions" className={styles.mobileNavLink} onClick={() => setMobileMenuOpen(false)}>Live Sessions</Link>
+          <Link href="/sessions" className={styles.mobileNavLink} onClick={() => setMobileMenuOpen(false)}>Streaming Sessions</Link>
           <Link href="/instructors" className={styles.mobileNavLink} onClick={() => setMobileMenuOpen(false)}>Instructors</Link>
           {isAuthenticated ? (
             <>

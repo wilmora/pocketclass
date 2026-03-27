@@ -3,7 +3,7 @@
 import Link from 'next/link';
 import { useAuth } from '@/lib/auth-context';
 import { DollarSign, Users, BookOpen, Video, Plus, TrendingUp, Star, Calendar, ArrowRight, BarChart3, Settings } from 'lucide-react';
-import { courses, liveSessions } from '@/lib/mock-data';
+import { courses, streamingSessions } from '@/lib/mock-data';
 import styles from './instDash.module.css';
 
 export default function InstructorDashboard() {
@@ -102,7 +102,7 @@ export default function InstructorDashboard() {
                 <Plus size={18} /> Create a new course
               </Link>
               <Link href="/instructor/sessions" className={styles.actionItem}>
-                <Video size={18} /> Schedule live session
+                <Video size={18} /> Schedule streaming session
               </Link>
               <Link href="/messages" className={styles.actionItem}>
                 <Users size={18} /> View student messages

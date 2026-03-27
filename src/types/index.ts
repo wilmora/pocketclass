@@ -73,7 +73,7 @@ export interface Lesson {
   isCompleted?: boolean;
 }
 
-export interface LiveSession {
+export interface StreamingSession {
   id: string;
   title: string;
   description: string;

@@ -85,8 +85,8 @@ export default function CoursesPage() {
                   <span>({course.reviewCount})</span>
                 </div>
                 <div className={styles.price}>
-                  <strong>${course.price}</strong>
-                  {course.originalPrice && <del>${course.originalPrice}</del>}
+                  <strong>Free Enrollment</strong>
+                  <span className={styles.videoPricing}>$2 per video</span>
                 </div>
               </div>
             </div>

@@ -14,6 +14,7 @@ export default function CourseDetailPage() {
   const course = courses.find(c => c.id === params.id);
   const [openChapters, setOpenChapters] = useState<string[]>([course?.chapters[0]?.id || '']);
   const [showCheckout, setShowCheckout] = useState(false);
+  const [selectedVideos, setSelectedVideos] = useState<Set<string>>(new Set());
 
   if (!course) return <div className={styles.notFound}>Course not found</div>;
 
@@ -21,6 +22,21 @@ export default function CourseDetailPage() {
   const toggleChapter = (id: string) => {
     setOpenChapters(prev => prev.includes(id) ? prev.filter(c => c !== id) : [...prev, id]);
   };
+
+  const toggleVideoSelection = (videoId: string) => {
+    setSelectedVideos(prev => {
+      const newSet = new Set(prev);
+      if (newSet.has(videoId)) {
+        newSet.delete(videoId);
+      } else {
+        newSet.add(videoId);
+      }
+      return newSet;
+    });
+  };
+
+  const selectedCount = selectedVideos.size;
+  const totalCost = selectedCount * 2;
 
   return (
     <div className={styles.page}>
@@ -79,9 +95,24 @@ export default function CourseDetailPage() {
                     <div className={styles.lessonList}>
                       {chapter.lessons.map(lesson => (
                         <div key={lesson.id} className={styles.lessonItem}>
-                          {lesson.type === 'video' ? <Play size={14} /> : <BookOpen size={14} />}
+                          {lesson.type === 'video' ? (
+                            <>
+                              <input
+                                type="checkbox"
+                                checked={selectedVideos.has(lesson.id)}
+                                onChange={() => toggleVideoSelection(lesson.id)}
+                                className={styles.videoCheckbox}
+                              />
+                              <Play size={14} />
+                            </>
+                          ) : (
+                            <BookOpen size={14} />
+                          )}
                           <span className={styles.lessonTitle}>{lesson.title}</span>
                           {lesson.isFree && <span className={styles.freeBadge}>Free</span>}
+                          {lesson.type === 'video' && !lesson.isFree && (
+                            <span className={styles.videoPrice}>$2</span>
+                          )}
                           <span className={styles.lessonDuration}>{lesson.duration}</span>
                         </div>
                       ))}
@@ -124,16 +155,22 @@ export default function CourseDetailPage() {
             </div>
             <div className={styles.sidebarBody}>
               <div className={styles.priceRow}>
-                <span className={styles.mainPrice}>${course.price}</span>
-                {course.originalPrice && <span className={styles.origPrice}>${course.originalPrice}</span>}
+                <span className={styles.mainPrice}>Free Enrollment</span>
+                <span className={styles.videoPricing}>$2 per video</span>
               </div>
+              {selectedCount > 0 && (
+                <div className={styles.selectionSummary}>
+                  <p>{selectedCount} video{selectedCount !== 1 ? 's' : ''} selected</p>
+                  <p className={styles.totalCost}>Total: ${totalCost}</p>
+                </div>
+              )}
               <button className={styles.enrollBtn} onClick={() => setShowCheckout(true)}>
-                Enroll Now
+                {selectedCount > 0 ? `Purchase ${selectedCount} Video${selectedCount !== 1 ? 's' : ''}` : 'Select Videos to Start'}
               </button>
               <button className={styles.wishlistBtn}>Add to Wishlist</button>
               <ul className={styles.includes}>
-                <li><Video size={16} /> {course.duration} of video content</li>
-                <li><BookOpen size={16} /> {course.lessonCount} lessons</li>
+                <li><Video size={16} /> Choose your own learning path</li>
+                <li><BookOpen size={16} /> {course.lessonCount} lessons available</li>
                 <li><Award size={16} /> Certificate of completion</li>
                 <li><Clock size={16} /> Lifetime access</li>
                 <li><MessageSquare size={16} /> Direct instructor messaging</li>
@@ -151,6 +188,20 @@ export default function CourseDetailPage() {
             <div className={styles.modalCourse}>
               <h4>{course.title}</h4>
               <p>by {course.instructor.name}</p>
+              <div className={styles.selectedVideos}>
+                <h5>Selected Videos ({selectedCount})</h5>
+                {course.chapters.map(chapter =>
+                  chapter.lessons
+                    .filter(lesson => selectedVideos.has(lesson.id))
+                    .map(lesson => (
+                      <div key={lesson.id} className={styles.selectedVideo}>
+                        <Play size={14} />
+                        <span>{lesson.title}</span>
+                        <span>$2</span>
+                      </div>
+                    ))
+                )}
+              </div>
             </div>
             <div className={styles.paymentMethods}>
               <h3>Payment Method</h3>
@@ -172,11 +223,11 @@ export default function CourseDetailPage() {
               </div>
             </div>
             <div className={styles.modalTotal}>
-              <span>Total</span>
-              <strong>${course.price}</strong>
+              <span>Total ({selectedCount} video{selectedCount !== 1 ? 's' : ''})</span>
+              <strong>${totalCost}</strong>
             </div>
-            <button className={styles.payBtn} onClick={() => { setShowCheckout(false); alert('Payment successful! (Demo)'); }}>
-              Pay ${course.price}
+            <button className={styles.payBtn} onClick={() => { setShowCheckout(false); alert(`Payment successful! You now have access to ${selectedCount} video${selectedCount !== 1 ? 's' : ''}. (Demo)`); }}>
+              Pay ${totalCost}
             </button>
             <p className={styles.secureNote}>🔒 Secured with 256-bit encryption</p>
           </div>

@@ -35,6 +35,7 @@
 .rating strong { color: var(--color-text); }
 .rating span { color: var(--color-text-muted); }
 .price strong { font-size: var(--text-lg); color: var(--color-text); }
+.videoPricing { font-size: var(--text-sm); color: var(--color-primary); font-weight: var(--font-semibold); margin-left: var(--space-2); }
 .price del { font-size: var(--text-sm); color: var(--color-text-muted); margin-left: var(--space-2); }
 
 @media (max-width: 1024px) { .courseGrid { grid-template-columns: repeat(2, 1fr); } }

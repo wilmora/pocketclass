@@ -41,7 +41,7 @@ export default function AdminDashboard() {
             <div className={styles.statCard}><Users size={24} className={styles.statIcon} /><div><strong>{platformStats.totalUsers.toLocaleString()}</strong><span>Total Users</span></div></div>
             <div className={styles.statCard}><BookOpen size={24} className={styles.statIcon} /><div><strong>{platformStats.totalCourses}</strong><span>Total Courses</span></div></div>
             <div className={styles.statCard + ' ' + styles.revenueCard}><DollarSign size={24} /><div><strong>${platformStats.totalRevenue.toLocaleString()}</strong><span>Total Revenue</span></div></div>
-            <div className={styles.statCard}><Activity size={24} className={styles.statIcon} /><div><strong>{platformStats.activeSessionsToday}</strong><span>Live Sessions Today</span></div></div>
+            <div className={styles.statCard}><Activity size={24} className={styles.statIcon} /><div><strong>{platformStats.activeSessionsToday}</strong><span>Streaming Sessions Today</span></div></div>
           </div>
           <div className={styles.overviewGrid}>
             <div className={styles.panel}>
